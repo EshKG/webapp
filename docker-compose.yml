@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - REDIS_URL=redis://redis:6379
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    depends_on:
+      - redis
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6380:6379"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - backend
+
+volumes:
+  mongo_data:
+
+networks:
+  backend:
